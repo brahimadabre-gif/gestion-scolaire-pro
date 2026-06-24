@@ -1,0 +1,13 @@
+{
+  "name": "gestion-scolaire-pro",
+  "version": "1.0.0",
+  "description": "Application de gestion scolaire pour école primaire",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required for static site'",
+    "serve": "npx serve ."
+  },
+  "keywords": ["school", "management", "education"],
+  "author": "Dabre Brahima",
+  "license": "MIT"
+}

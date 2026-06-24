@@ -1,0 +1,32 @@
+/* Styles spécifiques pour l'impression */
+@media print {
+    .no-print,
+    .sidebar,
+    .sidebar-overlay,
+    .mobile-header,
+    .theme-toggle-btn,
+    .btn,
+    .fab,
+    .toast,
+    .modal,
+    .license-banner,
+    .action-buttons {
+        display: none !important;
+    }
+    .page-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    .page-section {
+        display: block !important;
+        page-break-after: always;
+    }
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    .fille {
+        color: inherit !important;
+        font-weight: inherit !important;
+    }
+}
