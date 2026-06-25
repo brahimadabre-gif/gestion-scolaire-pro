@@ -1,0 +1,61 @@
+{
+  "name": "gestion-scolaire-pro",
+  "version": "1.0.0",
+  "description": "Application de gestion scolaire pour école primaire",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": ["school", "management", "education", "desktop"],
+  "author": "Dabre Brahima",
+  "license": "MIT",
+  "build": {
+    "appId": "com.brahimadabre.gestion-scolaire-pro",
+    "productName": "Gestion Scolaire Pro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "style.css",
+      "print.css",
+      "main.js",
+      "electron-main.js",
+      "preload.js",
+      "icon.png",
+      "assets/"
+    ],
+    "icon": "icon.png",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "GestionScolairePro-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Gestion Scolaire Pro"
+    },
+    "portable": {
+      "artifactName": "GestionScolairePro-${version}-Portable.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.0"
+  }
+}

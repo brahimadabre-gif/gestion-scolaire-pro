@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Scolaire Pro - École Primaire</title>
+    <link rel="stylesheet" href="print.css">
+    
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <script>try { document.documentElement.setAttribute('data-theme', localStorage.getItem('gsproTheme') || 'light'); } catch (e) {}</script>
+    <!-- Login -->
+    <div class="login-container" id="loginPage">
+        <button class="theme-toggle-btn" id="loginThemeToggleBtn" title="Mode sombre / clair" onclick="toggleDarkMode()" style="position:absolute; top:18px; right:18px; border-color:rgba(255,255,255,0.4); color:#fff;">🌙</button>
+        <div class="login-card">
+            <div class="logo-icon">&#127979;</div>
+            <h2>Gestion Scolaire Pro</h2>
+            <p class="subtitle" id="loginSchoolName">École Primaire - Administration</p>
+            <div class="auth-panel active" id="loginPanel">
+                <form id="loginForm" autocomplete="off">
+                    <div class="form-group"><label>Nom d'utilisateur</label><input type="text" id="loginUsername" autocomplete="username" required></div>
+                    <div class="form-group"><label>Mot de passe</label><div class="password-field-wrap"><input type="password" id="loginPassword" autocomplete="current-password" required><button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Afficher/masquer le mot de passe">👁️</button></div></div>
+                    <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;margin-top:-4px;"><input type="checkbox" id="rememberMeCheck" style="width:auto;margin:0;" onchange="toggleRememberMeHint()"><label for="rememberMeCheck" style="margin:0;font-weight:500;font-size:0.85rem;color:var(--gray-500);cursor:pointer;">Se souvenir de moi</label></div>
+                    <button type="submit" class="btn-login">Se connecter</button>
+                    <p class="login-error" id="loginError">Identifiants incorrects</p>
+                <p id="rememberMeHint" style="display:none;font-size:0.75rem;color:var(--gray-500);margin-top:4px;text-align:center;">⚠️ Vos identifiants seront mémorisés sur cet appareil. Ne pas utiliser sur un ordinateur partagé.</p>
+                </form>
+                <div class="auth-actions">
+                    <button type="button" class="auth-link" onclick="showAuthPanel('setup')">Première configuration</button>
+                    <button type="button" class="auth-link" onclick="showAuthPanel('recovery')">Réinitialisation propriétaire</button>
+                </div>
+            </div>
+            <div class="auth-panel" id="setupPanel">
+                <form id="setupForm" autocomplete="off">
+                    <div class="form-group"><label>Nom du compte principal</label><input type="text" id="setupName" required></div>
+                    <div class="form-group"><label>Nom d'utilisateur principal</label><input type="text" id="setupUsername" autocomplete="off" required></div>
+                    <div class="form-group"><label>Mot de passe</label><div class="password-field-wrap"><input type="password" id="setupPassword" autocomplete="new-password" required><button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('setupPassword', this)" aria-label="Afficher/masquer le mot de passe">👁️</button></div></div>
+                    <div class="form-group"><label>Confirmer le mot de passe</label><div class="password-field-wrap"><input type="password" id="setupPasswordConfirm" autocomplete="new-password" required><button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('setupPasswordConfirm', this)" aria-label="Afficher/masquer le mot de passe">👁️</button></div></div>
+                    <div class="form-group"><label>Code de récupération propriétaire</label><div class="password-field-wrap"><input type="password" id="setupRecoveryKey" autocomplete="off" required><button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('setupRecoveryKey', this)" aria-label="Afficher/masquer le code">👁️</button></div></div>
+                    <p class="auth-hint">Le compte principal est créé une seule fois. Les secrets sont hachés et ne seront jamais affichés dans l'application.</p>
+                    <button type="submit" class="btn-login">Créer le compte principal</button>
+                </form>
+                <div class="auth-actions"><button type="button" class="auth-link" onclick="showAuthPanel('login')">Retour connexion</button></div>
+            </div>
+            <div class="auth-panel" id="recoveryPanel">
+                <form id="recoveryForm" autocomplete="off">
+                    <div class="form-group"><label>Code de récupération propriétaire</label><input type="password" id="recoveryKey" autocomplete="off" required></div>
+                    <div class="form-group"><label>Nouveau nom d'utilisateur principal</label><input type="text" id="recoveryUsername" autocomplete="off" required></div>
+                    <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="recoveryPassword" autocomplete="new-password" required></div>
+                    <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="recoveryPasswordConfirm" autocomplete="new-password" required></div>
+                    <button type="submit" class="btn-login">Réinitialiser le compte principal</button>
+                    <p class="login-error" id="recoveryError">Réinitialisation refusée</p>
+                </form>
+                <div class="auth-actions"><button type="button" class="auth-link" onclick="showAuthPanel('login')">Retour connexion</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application -->
+    <div class="app-container" id="appContainer">
+        <header class="app-header">
+            <div class="header-brand">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" title="Menu">&#9776;</button>
+                <div class="brand-icon">&#127979;</div>
+                <span id="headerSchoolName">École Primaire</span>
+            </div>
+            <div class="header-actions">
+                <span class="user-info" id="headerUser">Administrateur</span>
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Mode sombre / clair" onclick="toggleDarkMode()">🌙</button>
+                <button class="btn-icon" title="Gestion des licences" onclick="navigateTo('licences')">&#128273;</button>
+                <button class="btn-icon" title="Paramètres" onclick="navigateTo('parametres')">&#9881;</button>
+                <button class="btn-icon" title="Contacter le développeur" onclick="openContactModal()" style="font-size:1.2rem;">👨‍💻</button>
+                <button class="btn-sm btn-danger" onclick="logout()">Déconnexion</button>
+            </div>
+        </header>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="app-body">
+            <aside class="sidebar" id="sidebar">
+                <ul class="sidebar-nav">
+                    <li class="nav-section">Principal</li>
+                    <li><a data-page="dashboard" class="active" onclick="navigateTo('dashboard')">📊 Tableau de bord</a></li>
+                    <li><a data-page="eleves" onclick="navigateTo('eleves')">👥 Gestion des élèves</a></li>
+                    <li><a data-page="listeClasse" onclick="navigateTo('listeClasse')">📋 Liste de classe</a></li>
+                    <li class="nav-section">Académique</li>
+                    <li><a data-page="matieres" onclick="navigateTo('matieres')">📚 Gestion des matières</a></li>
+                    <li><a data-page="notes" onclick="navigateTo('notes')">📝 Saisie des notes</a></li>
+                    <li><a data-page="classement" onclick="navigateTo('classement')">🏆 Classement</a></li>
+                    <li class="nav-section">Édition</li>
+                    <li><a data-page="bulletins" onclick="navigateTo('bulletins')">📰 Bulletins scolaires</a></li>
+                    <li class="nav-section">Assiduité</li>
+                    <li><a data-page="registre" onclick="navigateTo('registre')">📋 Registre d'appel</a></li>
+                    <li><a data-page="assiduite" onclick="navigateTo('assiduite')">📊 Assiduité</a></li>
+                    <li><a data-page="parametres" onclick="navigateTo('parametres')">⚙️ Paramètres</a></li>
+                    <li class="nav-section">Système</li>
+                    <li><a data-page="licences" onclick="navigateTo('licences')">&#128273; Gestion des licences</a></li>
+                    <li><a data-page="utilisateurs" data-permission="manageUsers" onclick="navigateTo('utilisateurs')">👤 Gestion des utilisateurs</a></li>
+                    <li><a data-page="historique" onclick="navigateTo('historique')">🕰️ Historique</a></li>
+                    <li class="nav-section">Développeur</li>
+                    <li><a data-page="journal-impressions" onclick="navigateTo('journal-impressions')">📑 Journal des impressions</a></li>
+                    <li><a onclick="openContactModal()">📞 Contact développeur</a></li>
+                    <li><a onclick="openAboutModal(event)">ℹ️ À propos</a></li>
+                </ul>
+            </aside>
+            <main class="main-content" id="mainContent">
+                <div class="license-banner" id="licenseBanner">
+                    <div id="licenseBannerText">Licence en cours de vérification...</div>
+                    <button class="btn btn-outline" onclick="navigateTo('licences')">Gérer</button>
+                </div>
+
+                <!-- Dashboard -->
+                <div class="page active" id="page-dashboard">
+                    <h2 style="margin-bottom:18px;">📊 Tableau de bord</h2>
+                    <div class="form-row mb-3">
+                        <div class="form-group"><label>Niveau</label><select id="dashboardLevel" onchange="renderDashboard()"><option value="">Tous les niveaux</option></select></div>
+                    </div>
+                    <div class="stats-grid" id="dashboardStats"></div>
+                    <div class="card"><div class="card-header"><span class="card-title">Répartition des moyennes (dernière composition)</span></div><div id="chartRepartition" style="padding:10px;"></div></div>
+                    <!-- AJOUT v1.3.0 : colonne Genre dans le Top 5 -->
+                    <div class="card"><div class="card-header"><span class="card-title">Top 5 des meilleurs élèves</span></div><div class="table-container"><table><thead><tr><th>Rang</th><th>Élève</th><th>Genre</th><th>Classe</th><th>Moyenne</th></tr></thead><tbody id="topStudentsTable"></tbody></table></div></div>
+                    <!-- AJOUT v1.3.0 : tableau statistique effectifs par classe -->
+                    <div class="card" id="dashboardEffectifsCard"><div class="card-header"><span class="card-title">📊 Effectifs par classe</span></div><div class="table-container"><table><thead><tr><th>Classe</th><th>Garçons (M)</th><th>Filles (F)</th><th>Total</th></tr></thead><tbody id="effectifsParClasseTable"></tbody><tfoot id="effectifsParClasseFoot"></tfoot></table></div></div>
+                </div>
+
+                <!-- Élèves -->
+                <div class="page" id="page-eleves">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">👥 Gestion des élèves</span><button class="btn btn-primary" onclick="openStudentModal()">+ Ajouter un élève</button></div>
+                        <div class="form-inline mb-3">
+                            <div class="form-group"><input type="text" id="searchStudent" placeholder="Rechercher..." oninput="renderStudents()"></div>
+                            <div class="form-group"><select id="filterLevelStudent" onchange="renderStudents()"><option value="">Tous les niveaux</option></select></div>
+                            <button class="btn btn-outline" onclick="renderStudents()">🔍 Actualiser</button>
+                            <button class="btn btn-outline" onclick="sortStudentsAlpha()">🔤 Trier A-Z</button>
+                        </div>
+                        <!-- AJOUT v1.3.0 : colonne Statut dans la liste des élèves -->
+                        <div class="table-container"><table><thead><tr><th>N°</th><th>Matricule</th><th>Nom & Prénom</th><th>Sexe</th><th>Date naissance</th><th>Lieu de naissance</th><th>Niveau</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="studentsTable"></tbody></table></div>
+                        <p class="mt-2" style="color:var(--gray-500);font-size:0.8rem;" id="studentCount">0 élève(s)</p>
+                        <!-- AJOUT v1.3.0 : stats effectifs M/F dans la page Élèves -->
+                        <div id="elevesEffectifsStats" style="margin-top:10px;"></div>
+                        <p style="font-size:0.78rem; color:var(--gray-500); margin-top:4px;">
+                            <span style="color:#d32f2f; font-weight:600;">■</span> Filles &nbsp;
+                            <span style="color:inherit;">■</span> Garçons
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Liste de classe -->
+                <div class="page" id="page-listeClasse">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">📋 Liste de classe</span><div class="d-flex gap-2 flex-wrap"><select id="listeClasseLevel" onchange="renderListeClasse();"><option value="">Tous les niveaux</option></select><button class="btn btn-primary no-print" onclick="printClassList()">🖨️ Imprimer</button><button class="btn btn-outline no-print" onclick="exportListePdf()">📄 Exporter en PDF</button><button class="btn btn-outline no-print" onclick="exportListeCSV()">📥 Export CSV</button></div></div>
+                        <div class="no-print" id="listeSchoolEditor" style="margin-bottom:20px;"></div>
+                        <div class="table-container" id="listeClasseContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Matières -->
+                <div class="page" id="page-matieres">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">📚 Gestion des matières</span><button class="btn btn-primary" onclick="openSubjectModal()">+ Ajouter une matière</button></div>
+                        <div class="form-inline mb-3">
+                            <div class="form-group"><select id="subjectLevelFilter" onchange="renderSubjects()"><option value="">Toutes les classes</option></select></div>
+                            <button class="btn btn-outline" onclick="renderSubjects()">🔍 Actualiser</button>
+                        </div>
+                        <div class="table-container"><table><thead><tr><th>Matière</th><th>Barème</th><th>Coefficient</th><th>Classes</th><th>Actions</th></tr></thead><tbody id="subjectsTable"></tbody></table></div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="page" id="page-notes">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📝 Saisie des notes</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select id="notesLevel" onchange="onNotesLevelChange()"><option value="">Choisir un niveau</option></select>
+                                <button class="btn btn-success" onclick="saveAllNotes()">💾 Tout enregistrer</button>
+                            </div>
+                        </div>
+                        <div class="notes-nav" id="notesNav" style="display:none;">
+                            <div class="nav-buttons">
+                                <button class="btn btn-outline" id="btnPrevStudent" onclick="navigateStudent(-1)">◀ Précédent</button>
+                                <button class="btn btn-outline" id="btnNextStudent" onclick="navigateStudent(1)">Suivant ▶</button>
+                            </div>
+                            <div class="student-selector"><select id="notesStudentSelect" onchange="onStudentSelectChange()"><option value="">Sélectionner un élève</option></select></div>
+                            <div class="counter" id="notesCounter">Élève 0/0</div>
+                        </div>
+                        <div class="table-container" id="notesTableContainer"><p style="padding:20px;text-align:center;color:var(--gray-500);">Sélectionnez un niveau pour commencer la saisie.</p></div>
+                        <p class="notes-feedback" id="notesFeedback"></p>
+                        <p class="quick-nav-hint">⚡ Astuce : Tab = champ suivant, Ctrl+↑/↓ = changer d'élève.</p>
+                    </div>
+                </div>
+
+                <!-- Classement -->
+                <div class="page" id="page-classement">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">🏆 Classement</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select id="classementLevel" onchange="renderClassement()"><option value="">Tous les niveaux</option></select>
+                                <select id="classementComposition" onchange="renderClassement()">
+                                    <option value="c1">Composition N°1</option><option value="c2">Composition N°2</option><option value="c3">Composition N°3</option><option value="c4">Composition N°4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="classementSummary" class="mb-3"></div>
+                        <div class="table-container" id="classementTableContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Bulletins -->
+                <div class="page" id="page-bulletins">
+                    <div class="card">
+                        <div class="card-header no-print">
+                            <span class="card-title">📰 Bulletins scolaires</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select id="bulletinLevel" onchange="onBulletinLevelChange()"><option value="">Choisir un niveau</option></select>
+                                <select id="bulletinStudent" onchange="renderBulletin()"><option value="">Sélectionner un élève</option></select>
+                                <select id="bulletinComposition" onchange="renderBulletin()">
+                                    <option value="c1">Composition N°1</option><option value="c2">Composition N°2</option><option value="c3">Composition N°3</option><option value="c4">Composition N°4</option>
+                                </select>
+                                <button class="btn btn-primary no-print" onclick="printBulletin()">🖨️ Imprimer</button><button class="btn btn-outline no-print" onclick="exportBulletinPdf()">📄 Exporter en PDF</button>
+                            </div>
+                        </div>
+                        <div id="bulletinContainer"></div>
+                    </div>
+                </div>
+
+
+                <!-- Journal des impressions -->
+                <div class="page" id="page-journal-impressions">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">📑 Journal des impressions</span></div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Date</th><th>Heure</th><th>Utilisateur</th><th>Document</th></tr></thead>
+                                <tbody id="printLogTable"></tbody>
+                            </table>
+                            <p class="mt-2" style="color:var(--gray-500);font-size:0.8rem;" id="printLogCount">0 entrée(s)</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Paramètres -->
+                <div class="page" id="page-parametres">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">⚙️ Paramètres de l'école</span></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Nom de l'école</label><input type="text" id="schoolName" onchange="saveSchoolInfo()"></div>
+                            <div class="form-group"><label>Adresse</label><input type="text" id="schoolAddress" onchange="saveSchoolInfo()"></div>
+                            <div class="form-group"><label>Ville</label><input type="text" id="schoolCity" onchange="saveSchoolInfo()"></div>
+                            <div class="form-group"><label>Téléphone</label><input type="text" id="schoolPhone" onchange="saveSchoolInfo()"></div>
+                            <div class="form-group"><label>Année scolaire (libellé)</label><input type="text" id="schoolYear" onchange="saveSchoolInfo()" placeholder="ex: 2025-2026"></div></div><div class="form-row" style="margin-bottom:10px;"><div class="form-group" style="grid-column:1 / -1;"><label>Années scolaires disponibles</label><div id="schoolYearsList" class="d-flex gap-2 flex-wrap mb-2"></div><div class="d-flex gap-2"><input type="number" id="newSchoolYear" placeholder="Ajouter une année (ex: 2027)" style="max-width:250px;"><button class="btn btn-primary" onclick="addSchoolYear(document.getElementById('newSchoolYear').value)">+ Ajouter</button></div><p style="font-size:0.8rem;color:var(--gray-500);margin-top:4px;">Ces années alimentent les filtres du Registre d'appel et de l'Assiduité. Si aucune année n'est définie, une plage de 21 ans (±10) est générée automatiquement.</p></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">🎓 Gestion des niveaux</span><button class="btn btn-primary" onclick="openLevelModal()">+ Ajouter un niveau</button></div>
+                        <div id="levelsList" class="d-flex gap-2 flex-wrap"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">💾 Sauvegarde des données</span></div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline" data-permission="exportData" onclick="exportAllData()">📤 Exporter (JSON)</button>
+                            <button class="btn btn-outline" data-permission="exportData" onclick="exportEncryptedData()">🔒 Export chiffré</button>
+                            <button class="btn btn-outline" data-permission="exportData" onclick="document.getElementById('importFileInput').click()">📥 Importer</button>
+                            <input type="file" id="importFileInput" style="display:none;" accept=".json,.enc" onchange="importAllData(event)">
+                            <button class="btn btn-danger" data-permission="resetData" onclick="resetAllData()">🗑️ Réinitialiser</button>
+                        </div>
+                        <div class="mt-3">
+                            <label><input type="checkbox" id="enableAutoBackup" onchange="toggleAutoBackup()"> Sauvegardes automatiques</label>
+                            <div class="form-inline mt-2" style="align-items:center;">
+                                <span>Max backups :</span>
+                                <input type="number" id="maxBackups" value="5" min="1" max="20" style="width:80px;" onchange="updateMaxBackups()">
+                                <span>Fréquence :</span>
+                                <select id="backupFrequency" onchange="updateBackupFrequency()">
+                                    <option value="daily">Quotidienne</option>
+                                    <option value="weekly" selected>Hebdomadaire</option>
+                                    <option value="monthly">Mensuelle</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">🔐 Sécurité du compte</span></div>
+                        <div class="security-grid">
+                            <form id="profileForm" autocomplete="off" onsubmit="saveOwnProfile(event)">
+                                <h3 style="font-size:1rem;margin-bottom:12px;">Profil</h3>
+                                <div class="form-group"><label>Nom affiché</label><input type="text" id="profileDisplayName" required></div>
+                                <div class="form-group"><label>Nouveau nom d'utilisateur</label><input type="text" id="profileUsername" autocomplete="username" required></div>
+                                <div class="form-group"><label>Mot de passe actuel</label><input type="password" id="profileCurrentPassword" autocomplete="current-password" required></div>
+                                <button class="btn btn-primary" type="submit">Enregistrer le profil</button>
+                            </form>
+                            <div class="form-group" style="margin-top:12px;"><label style="font-size:0.85rem;color:var(--gray-500);">Connexion automatique</label><div id="rememberMeStatusParam" style="font-size:0.85rem;color:var(--gray-600);margin-bottom:6px;">Aucun identifiant mémorisé.</div><button type="button" class="btn btn-outline" id="btnForgetCredentials" onclick="clearRememberMe()" style="display:none;">🗑️ Oublier mes identifiants</button></div>
+                            <form id="passwordForm" autocomplete="off" onsubmit="changeOwnPassword(event)">
+                                <h3 style="font-size:1rem;margin-bottom:12px;">Mot de passe</h3>
+                                <div class="form-group"><label>Ancien mot de passe</label><input type="password" id="oldPassword" autocomplete="current-password" required></div>
+                                <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="newPassword" autocomplete="new-password" required></div>
+                                <div class="form-group"><label>Confirmer le nouveau mot de passe</label><input type="password" id="newPasswordConfirm" autocomplete="new-password" required></div>
+                                <p class="password-rules">Minimum 8 caractères (lettres et/ou chiffres). Les mots de passe trop simples sont refusés.</p>
+                                <button class="btn btn-primary" type="submit">Changer le mot de passe</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">👨‍💻 Développeur</span></div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a class="btn btn-primary" href="tel:+2250709933364">📞 Appeler</a>
+                            <a class="btn btn-success" href="https://wa.me/2250709933364?text=Bonjour%20M.%20Dabre%20Brahima%2C%0A%0AJe%20vous%20contacte%20%C3%A0%20propos%20de%20Gestion%20Scolaire%20Pro.%0A%0AMerci." target="_blank" rel="noopener" style="background:#25d366;color:white;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.85rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                WhatsApp
+                            </a>
+                            <a class="btn btn-outline" href="mailto:brahimadabre@yahoo.com">✉️ E-mail</a>
+                            <button class="btn btn-outline" onclick="copyDevCoords()">📋 Copier les coordonnées</button>
+                            <button class="btn btn-outline" onclick="openContactModal()">📇 Fiche contact</button>
+                            <button class="btn btn-outline" onclick="openAboutModal(event)">ℹ️ À propos</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registre d'appel -->
+                <div class="page" id="page-registre">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📋 Registre d'appel</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select id="registreAnnee" onchange="onRegistreYearChange()"></select>
+                                <select id="registreTrimestre" onchange="onRegistreTrimestreChange()"><option value="1">Trimestre 1</option><option value="2">Trimestre 2</option><option value="3">Trimestre 3</option></select>
+                                <select id="registreMois" onchange="onRegistreMoisChange()"></select>
+                                <select id="registreDate" onchange="onRegistreDateChange()"></select>
+                                <select id="registreClasse" onchange="onRegistreClasseChange()"><option value="">Classe...</option></select>
+                                <button class="btn btn-outline" onclick="printRegistre()">🖨️ Imprimer</button>
+                                <button class="btn btn-outline" onclick="exportRegistrePdf()">📄 PDF</button>
+                            </div>
+                        </div>
+                        <div class="form-inline mb-3">
+                            <input type="text" id="searchRegistreEleve" placeholder="🔍 Rechercher un élève..." oninput="renderRegistreTable()">
+                            <button class="btn btn-success" onclick="setAllPresent()">✅ Tous présents</button>
+                            <button class="btn btn-danger" onclick="setAllAbsent()">✗ Tous absents</button>
+                            <button class="btn btn-primary" onclick="saveRegistre()">💾 Enregistrer l'appel</button>
+                        </div>
+                        <div id="registreStats" class="stats-grid mb-3"></div>
+                        <div class="table-container" id="registreTableContainer">
+                            <p style="padding:20px;text-align:center;color:var(--gray-500);">Sélectionnez une date pour afficher le registre.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assiduité -->
+                <div class="page" id="page-assiduite">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📊 Assiduité des élèves</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select id="assiduiteAnnee" onchange="onAssiduiteYearChange()"></select>
+                                <select id="assiduiteMois" onchange="renderAssiduiteTable()"><option value="all">Année complète</option><option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option><option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option><option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option><option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option></select>
+                                <select id="assiduiteClasse" onchange="renderAssiduiteTable()"><option value="">Classe...</option></select>
+                                <button class="btn btn-outline" onclick="printAssiduite()">🖨️ Imprimer</button>
+                                <button class="btn btn-outline" onclick="exportAssiduitePdf()">📄 PDF</button>
+                            </div>
+                        </div>
+                        <div class="table-container" id="assiduiteTableContainer">
+                            <p style="padding:20px;text-align:center;color:var(--gray-500);">Sélectionnez une classe et une période.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Licences -->
+                <div class="page" id="page-licences">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">&#128273; Gestion des licences</span>
+                            <span class="badge badge-info" id="licenseStatusBadge">Vérification...</span>
+                        </div>
+                        <div id="licenseAccessAlert" class="license-alert" style="display:none;"></div>
+                        <div class="license-summary-grid">
+                            <div class="license-summary-item">
+                                <div class="license-summary-label">Type de licence</div>
+                                <div class="license-summary-value" id="licenseTypeValue">-</div>
+                            </div>
+                            <div class="license-summary-item">
+                                <div class="license-summary-label">Date d'activation</div>
+                                <div class="license-summary-value" id="licenseActivatedValue">-</div>
+                            </div>
+                            <div class="license-summary-item">
+                                <div class="license-summary-label">Date d'expiration</div>
+                                <div class="license-summary-value" id="licenseExpiresValue">-</div>
+                            </div>
+                            <div class="license-summary-item">
+                                <div class="license-summary-label">Jours restants</div>
+                                <div class="license-summary-value" id="licenseDaysValue">-</div>
+                            </div>
+                        </div>
+                        <div class="license-key-row">
+                            <div class="form-group">
+                                <label for="licenseKeyInput">Clé de licence</label>
+                                <input type="text" id="licenseKeyInput" placeholder="Ex : GSP-3M-XXXX-XXXX-XXXX ou GSP-12M-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+                            </div>
+                            <button class="btn btn-primary" id="activateLicenseBtn" onclick="activateLicenseFromInput()">✅ Activer la licence</button>
+                            <label class="btn btn-outline" style="margin-left:8px" title="Importer le stock de licences">📦 Importer le stock<input type="file" id="importStockFileInput" accept=".json,.txt" style="display:none"></label>
+                        </div>
+                        <p class="password-rules">
+                            Formats de clés acceptés : GSP-7J-XXXX-XXXX-XXXX (Essai 7 jours), GSP-3M-XXXX-XXXX-XXXX (3 mois), GSP-6M-XXXX-XXXX-XXXX (6 mois), GSP-12M-XXXX-XXXX-XXXX (12 mois). Les clés sont vérifiées par empreinte SHA-256. Contactez le développeur pour obtenir une clé.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">&#128737; Sécurité licence</span></div>
+                        <div id="licenseSecurityDetails" class="security-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Utilisateurs -->
+                <div class="page" id="page-utilisateurs">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">👤 Gestion des utilisateurs</span>
+                            <button class="btn btn-primary" data-permission="manageUsers" onclick="openUserModal()">+ Ajouter un utilisateur</button>
+                        </div>
+                        <div class="form-inline mb-3">
+                            <div class="form-group"><input type="text" id="searchUser" placeholder="Rechercher un utilisateur..." oninput="renderUsers()"></div>
+                            <div class="form-group">
+                                <select id="filterUserRole" onchange="renderUsers()">
+                                    <option value="">Tous les rôles</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-outline" onclick="renderUsers()">🔍 Actualiser</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th><th>Actions</th></tr></thead>
+                                <tbody id="usersTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">🔐 Rôles et permissions</span></div>
+                        <div id="rolesPermissionsList" class="security-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Historique -->
+                <div class="page" id="page-historique">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">🕰️ Historique des actions</span><button class="btn btn-outline" onclick="clearHistory()">Effacer l'historique</button></div>
+                        <div class="table-container"><table><thead><tr><th>Date</th><th>Heure</th><th>Utilisateur</th><th>Action</th></tr></thead><tbody id="historyTable"></tbody></table></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <footer class="app-footer">
+            <div><span class="status-dot saved" id="saveStatusDot"></span><span id="saveStatusText">Données sauvegardées</span></div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span id="lastSaveTime">Dernière sauvegarde : --</span>
+                <button onclick="openContactModal()" style="background:none;border:none;cursor:pointer;font-size:0.78rem;color:var(--gray-500);display:flex;align-items:center;gap:4px;" title="Contacter le développeur">
+                    👨‍💻 <span>Dabre Brahima</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals app -->
+    <div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="printContainer"></div>
+
+    <!-- ===== CARTE DÉVELOPPEUR FLOTTANTE ===== -->
+    <div id="devCard">
+        <div id="devCardBubble" onclick="openContactModal()">
+            <div class="dev-card-header">
+                <div class="dev-avatar">DB</div>
+                <div>
+                    <div class="dev-name">Dabre Brahima</div>
+                    <div class="dev-role">Enseignant du Primaire<br>Développeur Freelance</div>
+                </div>
+            </div>
+            <div class="dev-tagline">✨ "La gestion scolaire simplifiée"</div>
+            <div class="dev-action-btns">
+                <a class="dev-btn-mini" href="tel:+2250709933364" onclick="event.stopPropagation()">📞 Appeler</a>
+                <a class="dev-btn-mini wa" href="https://wa.me/2250709933364?text=Bonjour%20M.%20Dabre%20Brahima%2C%0A%0AJe%20vous%20contacte%20%C3%A0%20propos%20de%20Gestion%20Scolaire%20Pro.%0A%0AMerci." target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    WhatsApp
+                </a>
+                <button class="dev-btn-mini" onclick="event.stopPropagation();openAboutModal(event)">ℹ️ Infos</button>
+            </div>
+        </div>
+        <button id="devToggleBtn" onclick="toggleDevCard()" title="Contacter le développeur">👨‍💻</button>
+    </div>
+
+    <!-- MODAL DE CONTACT -->
+    <div id="contactModal" onclick="if(event.target===this)closeContactModal()">
+        <div id="contactModalBox">
+            <div class="cm-header">
+                <button class="cm-close" onclick="closeContactModal()">✕</button>
+                <div class="cm-avatar-lg">DB</div>
+                <div class="cm-name">Dabre Brahima</div>
+                <div class="cm-title">Enseignant du Primaire &amp; Développeur Freelance</div>
+                <div class="cm-subtitle">Groupe Scolaire ANONO · Créateur de Gestion Scolaire Pro</div>
+            </div>
+            <div class="cm-body">
+                <div class="cm-info-row">
+                    <div class="cm-info-icon gray">📍</div>
+                    <div><div class="cm-info-label">Localisation</div><div class="cm-info-value">Abidjan – Côte d'Ivoire</div></div>
+                </div>
+                <div class="cm-info-row">
+                    <div class="cm-info-icon blue">📞</div>
+                    <div><div class="cm-info-label">Téléphone</div><div class="cm-info-value">+225 07 09 93 33 64</div></div>
+                </div>
+                <div class="cm-info-row">
+                    <div class="cm-info-icon green">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </div>
+                    <div><div class="cm-info-label">WhatsApp</div><div class="cm-info-value">+225 07 09 93 33 64</div></div>
+                </div>
+                <div class="cm-info-row">
+                    <div class="cm-info-icon orange">✉️</div>
+                    <div><div class="cm-info-label">E-mail</div><div class="cm-info-value">brahimadabre@yahoo.com</div></div>
+                </div>
+            </div>
+            <div class="cm-actions">
+                <a class="cm-action-btn cm-btn-call" href="tel:+2250709933364">📞 Appeler</a>
+                <a class="cm-action-btn cm-btn-wa" href="https://wa.me/2250709933364?text=Bonjour%20M.%20Dabre%20Brahima%2C%0A%0AJe%20vous%20contacte%20%C3%A0%20propos%20de%20Gestion%20Scolaire%20Pro.%0A%0AMerci." target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    WhatsApp
+                </a>
+                <a class="cm-action-btn cm-btn-email" href="mailto:brahimadabre@yahoo.com">✉️ E-mail</a>
+                <button class="cm-action-btn cm-btn-copy" onclick="copyDevCoords()">📋 Copier</button>
+                <button class="cm-action-btn cm-btn-about" onclick="openAboutModal(event)" style="grid-column: 1 / -1;">ℹ️ À propos de Gestion Scolaire Pro</button>
+            </div>
+            <div class="cm-qr-section">
+                <div class="cm-qr-label">📱 Scannez pour ouvrir WhatsApp directement</div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fwa.me%2F2250709933364&bgcolor=ffffff&color=075E54&margin=8" alt="QR Code WhatsApp" width="150" height="150" loading="lazy">
+                <div class="cm-qr-hint">Pointez l'appareil photo de votre téléphone pour démarrer la conversation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL À PROPOS -->
+    <div id="aboutModal" onclick="if(event.target===this)closeAboutModal()">
+        <div id="aboutModalBox">
+            <div class="about-logo">🏫</div>
+            <div class="about-title">Gestion Scolaire Pro</div>
+            <div class="about-version">Version 2.0 · Année scolaire 2025-2026</div>
+            <div class="about-desc">
+                Application complète de gestion scolaire pour les établissements du primaire. Gérez élèves, matières, notes, bulletins et classements depuis une interface simple et intuitive. Toutes les données sont stockées localement sur votre appareil — aucune connexion internet requise pour l'utilisation courante.
+            </div>
+            <div class="about-dev-line">
+                Conçu et développé par <strong>Dabre Brahima</strong><br>
+                Enseignant du Primaire · Groupe Scolaire ANONO<br>
+                Abidjan, Côte d'Ivoire<br><br>
+                📞 +225 07 09 93 33 64 · ✉️ brahimadabre@yahoo.com
+            </div>
+            <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <a class="cm-action-btn cm-btn-wa" style="padding:10px 20px;" href="https://wa.me/2250709933364" target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Contacter sur WhatsApp
+                </a>
+                <button class="cm-action-btn cm-btn-copy" style="padding:10px 20px;" onclick="closeAboutModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="main.js"></script>
+</body>
+
+</html>
